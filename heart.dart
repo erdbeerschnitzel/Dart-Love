@@ -15,7 +15,7 @@ class heart {
     CanvasElement drawingArea = document.query('#drawingArea');
 
     drawingArea.width = window.innerWidth - 100; 
-    drawingArea.height = window.innerHeight - 100;
+    drawingArea.height = window.innerHeight - 150;
 
     _intervalId = document.window.setInterval(this.heartMaker, 30);   
 
@@ -27,9 +27,9 @@ class heart {
     CanvasRenderingContext2D ctx = drawingArea.getContext('2d');
 
     ctx.fillStyle = 'black';
-    ctx.fillRect(0,0,window.innerWidth - 100,window.innerHeight - 100); 
+    ctx.fillRect(0,0,window.innerWidth - 100,window.innerHeight - 150); 
    
-    for(var i = 0; i <= window.innerHeight - 100; i += (window.innerHeight - 100)/20 ) {
+    for(var i = 0; i <= window.innerHeight - 150; i += (window.innerHeight - 150)/20 ) {
 
       var y = (window.innerWidth - 100)/6 * Math.sin(count + offset) + (window.innerWidth - 100)/2;
       var r = 30 * Math.sin(count) + 50; 

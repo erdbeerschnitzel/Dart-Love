@@ -2998,7 +2998,7 @@ function html_get$document() {
   }
   return $globals.secretDocument;
 }
-//  ********** Library heart **************
+//  ********** Library C:\Users\muzu\dart\heart\heart **************
 // ********** Code for heart **************
 function heart() {
   this.count = (0);
@@ -3007,16 +3007,16 @@ function heart() {
 heart.prototype.run = function() {
   var drawingArea = html_get$document().query("#drawingArea");
   drawingArea.set$width(html_get$window().get$innerWidth() - (100));
-  drawingArea.set$height(html_get$window().get$innerHeight() - (100));
+  drawingArea.set$height(html_get$window().get$innerHeight() - (150));
   this._intervalId = html_get$document().get$window().setInterval(this.get$heartMaker(), (30));
 }
 heart.prototype.heartMaker = function() {
   var drawingArea = html_get$document().query("#drawingArea");
   var ctx = drawingArea.getContext("2d");
   ctx.set$fillStyle("black");
-  ctx.fillRect((0), (0), html_get$window().get$innerWidth() - (100), html_get$window().get$innerHeight() - (100));
+  ctx.fillRect((0), (0), html_get$window().get$innerWidth() - (100), html_get$window().get$innerHeight() - (150));
   for (var i = (0);
-   $lte(i, html_get$window().get$innerHeight() - (100)); i = $add(i, ((html_get$window().get$innerHeight() - (100)) / (20)))) {
+   $lte(i, html_get$window().get$innerHeight() - (150)); i = $add(i, ((html_get$window().get$innerHeight() - (150)) / (20)))) {
     var y = (html_get$window().get$innerWidth() - (100)) / (6) * Math.sin($add(this.count, this.offset)) + (html_get$window().get$innerWidth() - (100)) / (2);
     var r = (30) * Math.sin(this.count) + (50);
     ctx.set$fillStyle($add($add($add("hsl(", i), ",") + $mul(r, (2)), "%,50%)"));
