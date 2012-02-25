@@ -36,11 +36,7 @@ function $throw(e) {
   throw e;
 }
 $defProp(Object.prototype, '$index', function(i) {
-  var proto = Object.getPrototypeOf(this);
-  if (proto !== Object) {
-    proto.$index = function(i) { return this[i]; }
-  }
-  return this[i];
+  $throw(new NoSuchMethodException(this, "operator []", [i]));
 });
 $defProp(Array.prototype, '$index', function(index) {
   var i = index | 0;
@@ -55,21 +51,65 @@ $defProp(String.prototype, '$index', function(i) {
   return this[i];
 });
 function $wrap_call$0(fn) { return fn; }
-function $add(x, y) {
-  return ((typeof(x) == 'number' && typeof(y) == 'number') ||
-          (typeof(x) == 'string'))
-    ? x + y : x.$add(y);
+function $$add$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'string') {
+    var str = (y == null) ? 'null' : y.toString();
+    if (typeof(str) != 'string') {
+      throw new Error("calling toString() on right hand operand of operator " +
+      "+ did not return a String");
+    }
+    return x + str;
+  } else if (typeof(x) == 'object') {
+    return x.$add(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator +", [y]));
+  }
 }
-function $lte(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x <= y : x.$lte(y);
+
+function $$add(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x + y;
+  return $$add$complex(x, y);
 }
-function $mul(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x * y : x.$mul(y);
+function $$eq(x, y) {
+  if (x == null) return y == null;
+  return (typeof(x) != 'object') ? x === y : x.$eq(y);
 }
-function $negate(x) {
-  return (typeof(x) == 'number') ? -x : x.$negate();
+// TODO(jimhug): Should this or should it not match equals?
+$defProp(Object.prototype, '$eq', function(other) {
+  return this === other;
+});
+function $$lte$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$lte(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator <=", [y]));
+  }
+}
+function $$lte(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x <= y;
+  return $$lte$complex(x, y);
+}
+function $$mul$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$mul(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator *", [y]));
+  }
+}
+function $$mul(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x * y;
+  return $$mul$complex(x, y);
+}
+function $$negate(x) {
+  if (typeof(x) == 'number') return -x;
+  if (typeof(x) == 'object') return x.$negate();
+  $throw(new NoSuchMethodException(x, "operator negate", []));
 }
 $defProp(Object.prototype, "get$typeName", Object.prototype.$typeNameOf);
 // ********** Code for Object **************
@@ -84,6 +124,15 @@ $defProp(Object.prototype, "fillText$3", function($0, $1, $2) {
 });
 $defProp(Object.prototype, "getContext$0", function() {
   return this.noSuchMethod("getContext", []);
+});
+$defProp(Object.prototype, "is$Collection", function() {
+  return false;
+});
+$defProp(Object.prototype, "is$List", function() {
+  return false;
+});
+$defProp(Object.prototype, "is$Map", function() {
+  return false;
 });
 $defProp(Object.prototype, "setInterval$2", function($0, $1) {
   return this.noSuchMethod("setInterval", [$0, $1]);
@@ -103,6 +152,7 @@ function NoSuchMethodException(_receiver, _functionName, _arguments, _existingAr
   this._arguments = _arguments;
   this._existingArgumentNames = _existingArgumentNames;
 }
+NoSuchMethodException.prototype.is$NoSuchMethodException = function(){return true};
 NoSuchMethodException.prototype.toString = function() {
   var sb = new StringBufferImpl("");
   for (var i = (0);
@@ -113,7 +163,7 @@ NoSuchMethodException.prototype.toString = function() {
     sb.add(this._arguments.$index(i));
   }
   if (null == this._existingArgumentNames) {
-    return $add($add(("NoSuchMethodException : method not found: '" + this._functionName + "'\n"), ("Receiver: " + this._receiver + "\n")), ("Arguments: [" + sb + "]"));
+    return $$add($$add(("NoSuchMethodException : method not found: '" + this._functionName + "'\n"), ("Receiver: " + this._receiver + "\n")), ("Arguments: [" + sb + "]"));
   }
   else {
     var actualParameters = sb.toString();
@@ -126,7 +176,7 @@ NoSuchMethodException.prototype.toString = function() {
       sb.add(this._existingArgumentNames.$index(i));
     }
     var formalParameters = sb.toString();
-    return $add($add($add("NoSuchMethodException: incorrect number of arguments passed to ", ("method named '" + this._functionName + "'\nReceiver: " + this._receiver + "\n")), ("Tried calling: " + this._functionName + "(" + actualParameters + ")\n")), ("Found: " + this._functionName + "(" + formalParameters + ")"));
+    return $$add($$add($$add("NoSuchMethodException: incorrect number of arguments passed to ", ("method named '" + this._functionName + "'\nReceiver: " + this._receiver + "\n")), ("Tried calling: " + this._functionName + "(" + actualParameters + ")\n")), ("Found: " + this._functionName + "(" + formalParameters + ")"));
   }
 }
 // ********** Code for ClosureArgumentMismatchException **************
@@ -143,6 +193,13 @@ function IllegalArgumentException(arg) {
 IllegalArgumentException.prototype.is$IllegalArgumentException = function(){return true};
 IllegalArgumentException.prototype.toString = function() {
   return ("Illegal argument(s): " + this._arg);
+}
+// ********** Code for NoMoreElementsException **************
+function NoMoreElementsException() {
+
+}
+NoMoreElementsException.prototype.toString = function() {
+  return "NoMoreElementsException";
 }
 // ********** Code for UnsupportedOperationException **************
 function UnsupportedOperationException(_message) {
@@ -184,6 +241,8 @@ function to$call$2(f) { return f && f.to$call$2(); }
 //  ********** Library dart:coreimpl **************
 // ********** Code for ListFactory **************
 ListFactory = Array;
+$defProp(ListFactory.prototype, "is$List", function(){return true});
+$defProp(ListFactory.prototype, "is$Collection", function(){return true});
 $defProp(ListFactory.prototype, "get$length", function() { return this.length; });
 $defProp(ListFactory.prototype, "set$length", function(value) { return this.length = value; });
 $defProp(ListFactory.prototype, "add", function(value) {
@@ -192,10 +251,194 @@ $defProp(ListFactory.prototype, "add", function(value) {
 $defProp(ListFactory.prototype, "clear", function() {
   this.set$length((0));
 });
+$defProp(ListFactory.prototype, "removeLast", function() {
+  return this.pop();
+});
+$defProp(ListFactory.prototype, "iterator", function() {
+  return new ListIterator(this);
+});
+$defProp(ListFactory.prototype, "toString", function() {
+  return Collections.collectionToString(this);
+});
+// ********** Code for ListIterator **************
+function ListIterator(array) {
+  this._array = array;
+  this._pos = (0);
+}
+ListIterator.prototype.hasNext = function() {
+  return this._array.get$length() > this._pos;
+}
+ListIterator.prototype.next = function() {
+  if (!this.hasNext()) {
+    $throw(const$0001);
+  }
+  return this._array.$index(this._pos++);
+}
 // ********** Code for NumImplementation **************
 NumImplementation = Number;
 NumImplementation.prototype.$negate = function() {
   'use strict'; return -this;
+}
+// ********** Code for Collections **************
+function Collections() {}
+Collections.collectionToString = function(c) {
+  var result = new StringBufferImpl("");
+  Collections._emitCollection(c, result, new Array());
+  return result.toString();
+}
+Collections._emitCollection = function(c, result, visiting) {
+  visiting.add(c);
+  var isList = !!(c && c.is$List());
+  result.add(isList ? "[" : "{");
+  var first = true;
+  for (var $$i = c.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if (!first) {
+      result.add(", ");
+    }
+    first = false;
+    Collections._emitObject(e, result, visiting);
+  }
+  result.add(isList ? "]" : "}");
+  visiting.removeLast();
+}
+Collections._emitObject = function(o, result, visiting) {
+  if (!!(o && o.is$Collection())) {
+    if (Collections._containsRef(visiting, o)) {
+      result.add(!!(o && o.is$List()) ? "[...]" : "{...}");
+    }
+    else {
+      Collections._emitCollection(o, result, visiting);
+    }
+  }
+  else if (!!(o && o.is$Map())) {
+    if (Collections._containsRef(visiting, o)) {
+      result.add("{...}");
+    }
+    else {
+      Maps._emitMap(o, result, visiting);
+    }
+  }
+  else {
+    result.add($$eq(o) ? "null" : o);
+  }
+}
+Collections._containsRef = function(c, ref) {
+  for (var $$i = c.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if ((null == e ? null == (ref) : e === ref)) return true;
+  }
+  return false;
+}
+// ********** Code for HashMapImplementation **************
+function HashMapImplementation() {}
+HashMapImplementation.prototype.is$Map = function(){return true};
+HashMapImplementation.prototype.forEach = function(f) {
+  var length = this._keys.get$length();
+  for (var i = (0);
+   i < length; i++) {
+    var key = this._keys.$index(i);
+    if ((null != key) && ((null == key ? null != (const$0000) : key !== const$0000))) {
+      f(key, this._values.$index(i));
+    }
+  }
+}
+HashMapImplementation.prototype.toString = function() {
+  return Maps.mapToString(this);
+}
+// ********** Code for HashSetImplementation **************
+function HashSetImplementation() {}
+HashSetImplementation.prototype.is$Collection = function(){return true};
+HashSetImplementation.prototype.iterator = function() {
+  return new HashSetIterator(this);
+}
+HashSetImplementation.prototype.toString = function() {
+  return Collections.collectionToString(this);
+}
+// ********** Code for HashSetIterator **************
+function HashSetIterator(set_) {
+  this._entries = set_._backingMap._keys;
+  this._nextValidIndex = (-1);
+  this._advance();
+}
+HashSetIterator.prototype.hasNext = function() {
+  var $0;
+  if (this._nextValidIndex >= this._entries.get$length()) return false;
+  if ((($0 = this._entries.$index(this._nextValidIndex)) == null ? null == (const$0000) : $0 === const$0000)) {
+    this._advance();
+  }
+  return this._nextValidIndex < this._entries.get$length();
+}
+HashSetIterator.prototype.next = function() {
+  if (!this.hasNext()) {
+    $throw(const$0001);
+  }
+  var res = this._entries.$index(this._nextValidIndex);
+  this._advance();
+  return res;
+}
+HashSetIterator.prototype._advance = function() {
+  var length = this._entries.get$length();
+  var entry;
+  var deletedKey = const$0000;
+  do {
+    if (++this._nextValidIndex >= length) break;
+    entry = this._entries.$index(this._nextValidIndex);
+  }
+  while ((null == entry) || ((null == entry ? null == (deletedKey) : entry === deletedKey)))
+}
+// ********** Code for _DeletedKeySentinel **************
+function _DeletedKeySentinel() {
+
+}
+// ********** Code for Maps **************
+function Maps() {}
+Maps.mapToString = function(m) {
+  var result = new StringBufferImpl("");
+  Maps._emitMap(m, result, new Array());
+  return result.toString();
+}
+Maps._emitMap = function(m, result, visiting) {
+  visiting.add(m);
+  result.add("{");
+  var first = true;
+  m.forEach((function (k, v) {
+    if (!first) {
+      result.add(", ");
+    }
+    first = false;
+    Collections._emitObject(k, result, visiting);
+    result.add(": ");
+    Collections._emitObject(v, result, visiting);
+  })
+  );
+  result.add("}");
+  visiting.removeLast();
+}
+// ********** Code for DoubleLinkedQueue **************
+function DoubleLinkedQueue() {}
+DoubleLinkedQueue.prototype.is$Collection = function(){return true};
+DoubleLinkedQueue.prototype.iterator = function() {
+  return new _DoubleLinkedQueueIterator(this._sentinel);
+}
+DoubleLinkedQueue.prototype.toString = function() {
+  return Collections.collectionToString(this);
+}
+// ********** Code for _DoubleLinkedQueueIterator **************
+function _DoubleLinkedQueueIterator(_sentinel) {
+  this._sentinel = _sentinel;
+  this._currentEntry = this._sentinel;
+}
+_DoubleLinkedQueueIterator.prototype.hasNext = function() {
+  var $0;
+  return (($0 = this._currentEntry._next) == null ? null != (this._sentinel) : $0 !== this._sentinel);
+}
+_DoubleLinkedQueueIterator.prototype.next = function() {
+  if (!this.hasNext()) {
+    $throw(const$0001);
+  }
+  this._currentEntry = this._currentEntry._next;
+  return this._currentEntry.get$element();
 }
 // ********** Code for StringBufferImpl **************
 function StringBufferImpl(content) {
@@ -229,7 +472,7 @@ StringBase.join = function(strings, separator) {
   var s = strings.$index((0));
   for (var i = (1);
    i < strings.get$length(); i++) {
-    s = $add($add(s, separator), strings.$index(i));
+    s = $$add($$add(s, separator), strings.$index(i));
   }
   return s;
 }
@@ -414,9 +657,14 @@ $dynamic("get$parentNode").Node = function() { return this.parentNode; };
 // ********** Code for _CanvasGradientJs **************
 // ********** Code for _CanvasPatternJs **************
 // ********** Code for _CanvasPixelArrayJs **************
+$dynamic("is$List").CanvasPixelArray = function(){return true};
+$dynamic("is$Collection").CanvasPixelArray = function(){return true};
 $dynamic("get$length").CanvasPixelArray = function() { return this.length; };
 $dynamic("$index").CanvasPixelArray = function(index) {
   return this[index];
+}
+$dynamic("iterator").CanvasPixelArray = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").CanvasPixelArray = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -512,18 +760,28 @@ $dynamic("get$documentElement").Document = function() { return this.documentElem
 // ********** Code for _FileWriterSyncJs **************
 // ********** Code for _Float32ArrayJs **************
 var _Float32ArrayJs = {};
+$dynamic("is$List").Float32Array = function(){return true};
+$dynamic("is$Collection").Float32Array = function(){return true};
 $dynamic("get$length").Float32Array = function() { return this.length; };
 $dynamic("$index").Float32Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Float32Array = function() {
+  return new _FixedSizeListIterator_num(this);
 }
 $dynamic("add").Float32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Float64ArrayJs **************
 var _Float64ArrayJs = {};
+$dynamic("is$List").Float64Array = function(){return true};
+$dynamic("is$Collection").Float64Array = function(){return true};
 $dynamic("get$length").Float64Array = function() { return this.length; };
 $dynamic("$index").Float64Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Float64Array = function() {
+  return new _FixedSizeListIterator_num(this);
 }
 $dynamic("add").Float64Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -548,9 +806,14 @@ $dynamic("set$width").HTMLAppletElement = function(value) { return this.width = 
 $dynamic("set$height").HTMLCanvasElement = function(value) { return this.height = value; };
 $dynamic("set$width").HTMLCanvasElement = function(value) { return this.width = value; };
 // ********** Code for _HTMLCollectionJs **************
+$dynamic("is$List").HTMLCollection = function(){return true};
+$dynamic("is$Collection").HTMLCollection = function(){return true};
 $dynamic("get$length").HTMLCollection = function() { return this.length; };
 $dynamic("$index").HTMLCollection = function(index) {
   return this[index];
+}
+$dynamic("iterator").HTMLCollection = function() {
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").HTMLCollection = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -581,7 +844,6 @@ $dynamic("set$width").HTMLIFrameElement = function(value) { return this.width = 
 $dynamic("set$height").HTMLImageElement = function(value) { return this.height = value; };
 $dynamic("set$width").HTMLImageElement = function(value) { return this.width = value; };
 // ********** Code for _HTMLInputElementJs **************
-// ********** Code for _HTMLIsIndexElementJs **************
 // ********** Code for _HTMLKeygenElementJs **************
 // ********** Code for _HTMLLIElementJs **************
 // ********** Code for _HTMLLabelElementJs **************
@@ -602,6 +864,8 @@ $dynamic("set$width").HTMLObjectElement = function(value) { return this.width = 
 // ********** Code for _HTMLOptGroupElementJs **************
 // ********** Code for _HTMLOptionElementJs **************
 // ********** Code for _HTMLOptionsCollectionJs **************
+$dynamic("is$List").HTMLOptionsCollection = function(){return true};
+$dynamic("is$Collection").HTMLOptionsCollection = function(){return true};
 $dynamic("get$length").HTMLOptionsCollection = function() {
   return this.length;
 }
@@ -614,6 +878,7 @@ $dynamic("set$width").HTMLPreElement = function(value) { return this.width = val
 // ********** Code for _HTMLQuoteElementJs **************
 // ********** Code for _HTMLScriptElementJs **************
 // ********** Code for _HTMLSelectElementJs **************
+// ********** Code for _HTMLShadowElementJs **************
 // ********** Code for _HTMLSourceElementJs **************
 // ********** Code for _HTMLSpanElementJs **************
 // ********** Code for _HTMLStyleElementJs **************
@@ -656,27 +921,42 @@ $dynamic("set$width").HTMLVideoElement = function(value) { return this.width = v
 // ********** Code for _ImageDataJs **************
 // ********** Code for _Int16ArrayJs **************
 var _Int16ArrayJs = {};
+$dynamic("is$List").Int16Array = function(){return true};
+$dynamic("is$Collection").Int16Array = function(){return true};
 $dynamic("get$length").Int16Array = function() { return this.length; };
 $dynamic("$index").Int16Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Int16Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int16Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Int32ArrayJs **************
 var _Int32ArrayJs = {};
+$dynamic("is$List").Int32Array = function(){return true};
+$dynamic("is$Collection").Int32Array = function(){return true};
 $dynamic("get$length").Int32Array = function() { return this.length; };
 $dynamic("$index").Int32Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Int32Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Int8ArrayJs **************
 var _Int8ArrayJs = {};
+$dynamic("is$List").Int8Array = function(){return true};
+$dynamic("is$Collection").Int8Array = function(){return true};
 $dynamic("get$length").Int8Array = function() { return this.length; };
 $dynamic("$index").Int8Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Int8Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int8Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -692,9 +972,14 @@ $dynamic("add").Int8Array = function(value) {
 // ********** Code for _MediaElementAudioSourceNodeJs **************
 // ********** Code for _MediaErrorJs **************
 // ********** Code for _MediaListJs **************
+$dynamic("is$List").MediaList = function(){return true};
+$dynamic("is$Collection").MediaList = function(){return true};
 $dynamic("get$length").MediaList = function() { return this.length; };
 $dynamic("$index").MediaList = function(index) {
   return this[index];
+}
+$dynamic("iterator").MediaList = function() {
+  return new _FixedSizeListIterator_dart_core_String(this);
 }
 $dynamic("add").MediaList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -713,9 +998,14 @@ $dynamic("add").MediaList = function(value) {
 // ********** Code for _MouseEventJs **************
 // ********** Code for _MutationEventJs **************
 // ********** Code for _NamedNodeMapJs **************
+$dynamic("is$List").NamedNodeMap = function(){return true};
+$dynamic("is$Collection").NamedNodeMap = function(){return true};
 $dynamic("get$length").NamedNodeMap = function() { return this.length; };
 $dynamic("$index").NamedNodeMap = function(index) {
   return this[index];
+}
+$dynamic("iterator").NamedNodeMap = function() {
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").NamedNodeMap = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -725,9 +1015,14 @@ $dynamic("add").NamedNodeMap = function(value) {
 // ********** Code for _NodeFilterJs **************
 // ********** Code for _NodeIteratorJs **************
 // ********** Code for _NodeListJs **************
+$dynamic("is$List").NodeList = function(){return true};
+$dynamic("is$Collection").NodeList = function(){return true};
 $dynamic("get$length").NodeList = function() { return this.length; };
 $dynamic("$index").NodeList = function(index) {
   return this[index];
+}
+$dynamic("iterator").NodeList = function() {
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").NodeList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -947,9 +1242,14 @@ $dynamic("set$dartObjectLocalStorage").Storage = function(value) {
 // ********** Code for _StorageInfoJs **************
 // ********** Code for _StyleMediaJs **************
 // ********** Code for _StyleSheetListJs **************
+$dynamic("is$List").StyleSheetList = function(){return true};
+$dynamic("is$Collection").StyleSheetList = function(){return true};
 $dynamic("get$length").StyleSheetList = function() { return this.length; };
 $dynamic("$index").StyleSheetList = function(index) {
   return this[index];
+}
+$dynamic("iterator").StyleSheetList = function() {
+  return new _FixedSizeListIterator_dom_StyleSheet(this);
 }
 $dynamic("add").StyleSheetList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -964,9 +1264,14 @@ $dynamic("add").StyleSheetList = function(value) {
 // ********** Code for _TouchJs **************
 // ********** Code for _TouchEventJs **************
 // ********** Code for _TouchListJs **************
+$dynamic("is$List").TouchList = function(){return true};
+$dynamic("is$Collection").TouchList = function(){return true};
 $dynamic("get$length").TouchList = function() { return this.length; };
 $dynamic("$index").TouchList = function(index) {
   return this[index];
+}
+$dynamic("iterator").TouchList = function() {
+  return new _FixedSizeListIterator_dom_Touch(this);
 }
 $dynamic("add").TouchList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -977,10 +1282,10 @@ $dynamic("get$parentNode").TreeWalker = function() {
   return this.parentNode.bind(this);
 }
 Function.prototype.bind = Function.prototype.bind ||
-  function(thisObj, args) {
+  function(thisObj) {
     var func = this;
-    if (typeof args !== 'undefined') {
-      var boundArgs = Array.prototype.slice.call(arguments, 3);
+    if (arguments.length > 1) {
+      var boundArgs = Array.prototype.slice.call(arguments, 1);
       return function() {
         // Prepend the bound arguments to the current arguments.
         var newArgs = Array.prototype.slice.call(arguments);
@@ -995,38 +1300,55 @@ Function.prototype.bind = Function.prototype.bind ||
   };
 // ********** Code for _Uint16ArrayJs **************
 var _Uint16ArrayJs = {};
+$dynamic("is$List").Uint16Array = function(){return true};
+$dynamic("is$Collection").Uint16Array = function(){return true};
 $dynamic("get$length").Uint16Array = function() { return this.length; };
 $dynamic("$index").Uint16Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Uint16Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint16Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Uint32ArrayJs **************
 var _Uint32ArrayJs = {};
+$dynamic("is$List").Uint32Array = function(){return true};
+$dynamic("is$Collection").Uint32Array = function(){return true};
 $dynamic("get$length").Uint32Array = function() { return this.length; };
 $dynamic("$index").Uint32Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Uint32Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Uint8ArrayJs **************
 var _Uint8ArrayJs = {};
+$dynamic("is$List").Uint8Array = function(){return true};
+$dynamic("is$Collection").Uint8Array = function(){return true};
 $dynamic("get$length").Uint8Array = function() { return this.length; };
 $dynamic("$index").Uint8Array = function(index) {
   return this[index];
+}
+$dynamic("iterator").Uint8Array = function() {
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint8Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 // ********** Code for _Uint8ClampedArrayJs **************
 var _Uint8ClampedArrayJs = {};
+$dynamic("is$List").Uint8ClampedArray = function(){return true};
+$dynamic("is$Collection").Uint8ClampedArray = function(){return true};
 // ********** Code for _ValidityStateJs **************
 // ********** Code for _WaveShaperNodeJs **************
 // ********** Code for _WebGLActiveInfoJs **************
 // ********** Code for _WebGLBufferJs **************
-// ********** Code for _WebGLCompressedTexturesJs **************
+// ********** Code for _WebGLCompressedTextureS3TCJs **************
 // ********** Code for _WebGLContextAttributesJs **************
 // ********** Code for _WebGLContextEventJs **************
 // ********** Code for _WebGLDebugRendererInfoJs **************
@@ -1068,31 +1390,147 @@ var _Uint8ClampedArrayJs = {};
 // ********** Code for _XPathNSResolverJs **************
 // ********** Code for _XPathResultJs **************
 // ********** Code for _XSLTProcessorJs **************
+// ********** Code for _DOMParserFactoryProvider **************
+function _DOMParserFactoryProvider() {}
+// ********** Code for _DOMURLFactoryProvider **************
+function _DOMURLFactoryProvider() {}
+// ********** Code for _EventSourceFactoryProvider **************
+function _EventSourceFactoryProvider() {}
+// ********** Code for _FileReaderFactoryProvider **************
+function _FileReaderFactoryProvider() {}
+// ********** Code for _FileReaderSyncFactoryProvider **************
+function _FileReaderSyncFactoryProvider() {}
+// ********** Code for _HTMLAudioElementFactoryProvider **************
+function _HTMLAudioElementFactoryProvider() {}
+// ********** Code for _HTMLOptionElementFactoryProvider **************
+function _HTMLOptionElementFactoryProvider() {}
+// ********** Code for _MediaControllerFactoryProvider **************
+function _MediaControllerFactoryProvider() {}
+// ********** Code for _MediaStreamFactoryProvider **************
+function _MediaStreamFactoryProvider() {}
+// ********** Code for _MessageChannelFactoryProvider **************
+function _MessageChannelFactoryProvider() {}
+// ********** Code for _PeerConnectionFactoryProvider **************
+function _PeerConnectionFactoryProvider() {}
+// ********** Code for _ShadowRootFactoryProvider **************
+function _ShadowRootFactoryProvider() {}
+// ********** Code for _SharedWorkerFactoryProvider **************
+function _SharedWorkerFactoryProvider() {}
+// ********** Code for _TextTrackCueFactoryProvider **************
+function _TextTrackCueFactoryProvider() {}
+// ********** Code for _WebKitBlobBuilderFactoryProvider **************
+function _WebKitBlobBuilderFactoryProvider() {}
+// ********** Code for _WebKitCSSMatrixFactoryProvider **************
+function _WebKitCSSMatrixFactoryProvider() {}
+// ********** Code for _WorkerFactoryProvider **************
+function _WorkerFactoryProvider() {}
+// ********** Code for _XMLHttpRequestFactoryProvider **************
+function _XMLHttpRequestFactoryProvider() {}
+// ********** Code for _XMLSerializerFactoryProvider **************
+function _XMLSerializerFactoryProvider() {}
+// ********** Code for _XPathEvaluatorFactoryProvider **************
+function _XPathEvaluatorFactoryProvider() {}
+// ********** Code for _XSLTProcessorFactoryProvider **************
+function _XSLTProcessorFactoryProvider() {}
 // ********** Code for _Collections **************
 function _Collections() {}
 // ********** Code for _AudioContextFactoryProvider **************
 function _AudioContextFactoryProvider() {}
-// ********** Code for _DOMParserFactoryProvider **************
-function _DOMParserFactoryProvider() {}
-// ********** Code for _FileReaderFactoryProvider **************
-function _FileReaderFactoryProvider() {}
 // ********** Code for _TypedArrayFactoryProvider **************
 function _TypedArrayFactoryProvider() {}
-// ********** Code for _WebKitCSSMatrixFactoryProvider **************
-function _WebKitCSSMatrixFactoryProvider() {}
 // ********** Code for _WebKitPointFactoryProvider **************
 function _WebKitPointFactoryProvider() {}
 // ********** Code for _WebSocketFactoryProvider **************
 function _WebSocketFactoryProvider() {}
-// ********** Code for _XMLHttpRequestFactoryProvider **************
-function _XMLHttpRequestFactoryProvider() {}
-// ********** Code for _XSLTProcessorFactoryProvider **************
-function _XSLTProcessorFactoryProvider() {}
 // ********** Code for _VariableSizeListIterator **************
 function _VariableSizeListIterator() {}
+_VariableSizeListIterator.prototype.hasNext = function() {
+  return this._dom_array.get$length() > this._dom_pos;
+}
+_VariableSizeListIterator.prototype.next = function() {
+  if (!this.hasNext()) {
+    $throw(const$0001);
+  }
+  return this._dom_array.$index(this._dom_pos++);
+}
 // ********** Code for _FixedSizeListIterator **************
 $inherits(_FixedSizeListIterator, _VariableSizeListIterator);
 function _FixedSizeListIterator() {}
+_FixedSizeListIterator.prototype.hasNext = function() {
+  return this._dom_length > this._dom_pos;
+}
+// ********** Code for _VariableSizeListIterator_dart_core_String **************
+$inherits(_VariableSizeListIterator_dart_core_String, _VariableSizeListIterator);
+function _VariableSizeListIterator_dart_core_String(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_dart_core_String **************
+$inherits(_FixedSizeListIterator_dart_core_String, _FixedSizeListIterator);
+function _FixedSizeListIterator_dart_core_String(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_dart_core_String.call(this, array);
+}
+// ********** Code for _VariableSizeListIterator_int **************
+$inherits(_VariableSizeListIterator_int, _VariableSizeListIterator);
+function _VariableSizeListIterator_int(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_int **************
+$inherits(_FixedSizeListIterator_int, _FixedSizeListIterator);
+function _FixedSizeListIterator_int(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_int.call(this, array);
+}
+// ********** Code for _VariableSizeListIterator_num **************
+$inherits(_VariableSizeListIterator_num, _VariableSizeListIterator);
+function _VariableSizeListIterator_num(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_num **************
+$inherits(_FixedSizeListIterator_num, _FixedSizeListIterator);
+function _FixedSizeListIterator_num(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_num.call(this, array);
+}
+// ********** Code for _VariableSizeListIterator_dom_Node **************
+$inherits(_VariableSizeListIterator_dom_Node, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_Node(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_dom_Node **************
+$inherits(_FixedSizeListIterator_dom_Node, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_Node(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_dom_Node.call(this, array);
+}
+// ********** Code for _VariableSizeListIterator_dom_StyleSheet **************
+$inherits(_VariableSizeListIterator_dom_StyleSheet, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_StyleSheet(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_dom_StyleSheet **************
+$inherits(_FixedSizeListIterator_dom_StyleSheet, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_StyleSheet(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_dom_StyleSheet.call(this, array);
+}
+// ********** Code for _VariableSizeListIterator_dom_Touch **************
+$inherits(_VariableSizeListIterator_dom_Touch, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_Touch(array) {
+  this._dom_array = array;
+  this._dom_pos = (0);
+}
+// ********** Code for _FixedSizeListIterator_dom_Touch **************
+$inherits(_FixedSizeListIterator_dom_Touch, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_Touch(array) {
+  this._dom_length = array.get$length();
+  _VariableSizeListIterator_dom_Touch.call(this, array);
+}
 // ********** Code for _Lists **************
 function _Lists() {}
 // ********** Code for top level **************
@@ -2262,7 +2700,7 @@ LevelDom.wrapCanvasRenderingContext = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -2284,7 +2722,7 @@ LevelDom.wrapDocument = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -2886,7 +3324,7 @@ LevelDom.wrapElement = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -2921,6 +3359,11 @@ DocumentWrappingImplementation.prototype.get$window = function() {
 }
 // ********** Code for _ListWrapper **************
 function _ListWrapper() {}
+_ListWrapper.prototype.is$List = function(){return true};
+_ListWrapper.prototype.is$Collection = function(){return true};
+_ListWrapper.prototype.iterator = function() {
+  return this._list.iterator();
+}
 _ListWrapper.prototype.get$length = function() {
   return this._list.get$length();
 }
@@ -2932,6 +3375,9 @@ _ListWrapper.prototype.add = function(value) {
 }
 _ListWrapper.prototype.clear = function() {
   return this._list.clear();
+}
+_ListWrapper.prototype.removeLast = function() {
+  return this._list.removeLast();
 }
 // ********** Code for ObjectElementWrappingImplementation **************
 $inherits(ObjectElementWrappingImplementation, ElementWrappingImplementation);
@@ -3016,18 +3462,18 @@ heart.prototype.heartMaker = function() {
   ctx.set$fillStyle("black");
   ctx.fillRect((0), (0), html_get$window().get$innerWidth() - (100), html_get$window().get$innerHeight() - (150));
   for (var i = (0);
-   $lte(i, html_get$window().get$innerHeight() - (150)); i = $add(i, ((html_get$window().get$innerHeight() - (150)) / (20)))) {
-    var y = (html_get$window().get$innerWidth() - (100)) / (6) * Math.sin($add(this.count, this.offset)) + (html_get$window().get$innerWidth() - (100)) / (2);
+   $$lte(i, html_get$window().get$innerHeight() - (150)); i = $$add(i, ((html_get$window().get$innerHeight() - (150)) / (20)))) {
+    var y = (html_get$window().get$innerWidth() - (100)) / (6) * Math.sin($$add(this.count, this.offset)) + (html_get$window().get$innerWidth() - (100)) / (2);
     var r = (30) * Math.sin(this.count) + (50);
-    ctx.set$fillStyle($add($add($add("hsl(", i), ",") + $mul(r, (2)), "%,50%)"));
-    ctx.set$font($add($add("", r), "px Arial"));
-    ctx.fillText("\u2665 ", $negate(y) + (html_get$window().get$innerWidth() - (100)), i);
-    ctx.set$font($add($add("", r), "px Arial"));
+    ctx.set$fillStyle($$add($$add($$add("hsl(", i), ",") + $$mul(r, (2)), "%,50%)"));
+    ctx.set$font($$add($$add("", r), "px Arial"));
+    ctx.fillText("\u2665 ", $$negate(y) + (html_get$window().get$innerWidth() - (100)), i);
+    ctx.set$font($$add($$add("", r), "px Arial"));
     ctx.fillText("\u2665 ", y, i);
-    this.offset = $add(this.offset, (0.2));
+    this.offset = $$add(this.offset, (0.2));
   }
   this.offset = (0);
-  this.count = $add(this.count, (0.05));
+  this.count = $$add(this.count, (0.05));
 }
 heart.prototype.get$heartMaker = function() {
   return this.heartMaker.bind(this);
@@ -3036,7 +3482,7 @@ heart.prototype.get$heartMaker = function() {
 function main() {
   new heart().run();
 }
-// 39 dynamic types.
+// 40 dynamic types.
 // 504 types
 // 44 !leaf
 function $dynamicSetMetadata(inputTable) {
@@ -3057,7 +3503,7 @@ function $dynamicSetMetadata(inputTable) {
 (function(){
   var v0/*Document*/ = 'Document|HTMLDocument|SVGDocument';
   var v1/*Uint8Array*/ = 'Uint8Array|Uint8ClampedArray';
-  var v2/*Node*/ = [v0/*Document*/,'Node|Attr|CharacterData|Comment|Text|CDATASection|DocumentFragment|DocumentType|Element|HTMLElement|HTMLAnchorElement|HTMLAppletElement|HTMLAreaElement|HTMLBRElement|HTMLBaseElement|HTMLBaseFontElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement|HTMLContentElement|HTMLDListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormElement|HTMLFrameElement|HTMLFrameSetElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLInputElement|HTMLIsIndexElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMediaElement|HTMLAudioElement|HTMLVideoElement|HTMLMenuElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableElement|HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement|SVGElement|SVGAElement|SVGAltGlyphDefElement|SVGAltGlyphItemElement|SVGAnimationElement|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement|SVGAnimateTransformElement|SVGSetElement|SVGCircleElement|SVGClipPathElement|SVGComponentTransferFunctionElement|SVGFEFuncAElement|SVGFEFuncBElement|SVGFEFuncGElement|SVGFEFuncRElement|SVGCursorElement|SVGDefsElement|SVGDescElement|SVGEllipseElement|SVGFEBlendElement|SVGFEColorMatrixElement|SVGFEComponentTransferElement|SVGFECompositeElement|SVGFEConvolveMatrixElement|SVGFEDiffuseLightingElement|SVGFEDisplacementMapElement|SVGFEDistantLightElement|SVGFEDropShadowElement|SVGFEFloodElement|SVGFEGaussianBlurElement|SVGFEImageElement|SVGFEMergeElement|SVGFEMergeNodeElement|SVGFEMorphologyElement|SVGFEOffsetElement|SVGFEPointLightElement|SVGFESpecularLightingElement|SVGFESpotLightElement|SVGFETileElement|SVGFETurbulenceElement|SVGFilterElement|SVGFontElement|SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement|SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGlyphRefElement|SVGGradientElement|SVGLinearGradientElement|SVGRadialGradientElement|SVGHKernElement|SVGImageElement|SVGLineElement|SVGMPathElement|SVGMarkerElement|SVGMaskElement|SVGMetadataElement|SVGMissingGlyphElement|SVGPathElement|SVGPatternElement|SVGPolygonElement|SVGPolylineElement|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGStopElement|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTextContentElement|SVGTextPathElement|SVGTextPositioningElement|SVGAltGlyphElement|SVGTRefElement|SVGTSpanElement|SVGTextElement|SVGTitleElement|SVGUseElement|SVGVKernElement|SVGViewElement|Entity|EntityReference|Notation|ProcessingInstruction|ShadowRoot'].join('|');
+  var v2/*Node*/ = [v0/*Document*/,'Node|Attr|CharacterData|Comment|Text|CDATASection|DocumentFragment|ShadowRoot|DocumentType|Element|HTMLElement|HTMLAnchorElement|HTMLAppletElement|HTMLAreaElement|HTMLBRElement|HTMLBaseElement|HTMLBaseFontElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement|HTMLContentElement|HTMLDListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormElement|HTMLFrameElement|HTMLFrameSetElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLInputElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMediaElement|HTMLAudioElement|HTMLVideoElement|HTMLMenuElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLShadowElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableElement|HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement|SVGElement|SVGAElement|SVGAltGlyphDefElement|SVGAltGlyphItemElement|SVGAnimationElement|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement|SVGAnimateTransformElement|SVGSetElement|SVGCircleElement|SVGClipPathElement|SVGComponentTransferFunctionElement|SVGFEFuncAElement|SVGFEFuncBElement|SVGFEFuncGElement|SVGFEFuncRElement|SVGCursorElement|SVGDefsElement|SVGDescElement|SVGEllipseElement|SVGFEBlendElement|SVGFEColorMatrixElement|SVGFEComponentTransferElement|SVGFECompositeElement|SVGFEConvolveMatrixElement|SVGFEDiffuseLightingElement|SVGFEDisplacementMapElement|SVGFEDistantLightElement|SVGFEDropShadowElement|SVGFEFloodElement|SVGFEGaussianBlurElement|SVGFEImageElement|SVGFEMergeElement|SVGFEMergeNodeElement|SVGFEMorphologyElement|SVGFEOffsetElement|SVGFEPointLightElement|SVGFESpecularLightingElement|SVGFESpotLightElement|SVGFETileElement|SVGFETurbulenceElement|SVGFilterElement|SVGFontElement|SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement|SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGlyphRefElement|SVGGradientElement|SVGLinearGradientElement|SVGRadialGradientElement|SVGHKernElement|SVGImageElement|SVGLineElement|SVGMPathElement|SVGMarkerElement|SVGMaskElement|SVGMetadataElement|SVGMissingGlyphElement|SVGPathElement|SVGPatternElement|SVGPolygonElement|SVGPolylineElement|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGStopElement|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTextContentElement|SVGTextPathElement|SVGTextPositioningElement|SVGAltGlyphElement|SVGTRefElement|SVGTSpanElement|SVGTextElement|SVGTitleElement|SVGUseElement|SVGVKernElement|SVGViewElement|Entity|EntityReference|Notation|ProcessingInstruction'].join('|');
   var v3/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
   var v4/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
   var table = [
@@ -3067,9 +3513,15 @@ function $dynamicSetMetadata(inputTable) {
     , ['Node', v2/*Node*/]
     , ['Uint8Array', v1/*Uint8Array*/]
     , ['WorkerContext', v4/*WorkerContext*/]
-    , ['DOMType', [v1/*Uint8Array*/,v2/*Node*/,v3/*HTMLCollection*/,v4/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|AudioParam|AudioGain|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|CSSValueList|WebKitCSSTransformValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMTokenList|DOMSettableTokenList|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|EntrySync|DirectoryEntrySync|FileEntrySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MediaStreamEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|EventTarget|AbstractWorker|SharedWorker|Worker|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBRequest|IDBVersionChangeRequest|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MediaStream|LocalMediaStream|MediaStreamList|MediaStreamTrack|MediaStreamTrackList|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NavigatorUserMediaError|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|PeerConnection|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGStylable|SVGFilterPrimitiveStandardAttributes|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheet|CSSStyleSheet|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
+    , ['DOMType', [v1/*Uint8Array*/,v2/*Node*/,v3/*HTMLCollection*/,v4/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|AudioParam|AudioGain|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|CSSValueList|WebKitCSSTransformValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMTokenList|DOMSettableTokenList|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|EntrySync|DirectoryEntrySync|FileEntrySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MediaStreamEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|EventTarget|AbstractWorker|SharedWorker|Worker|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBRequest|IDBVersionChangeRequest|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MediaStream|LocalMediaStream|MediaStreamList|MediaStreamTrack|MediaStreamTrackList|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NavigatorUserMediaError|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|PeerConnection|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGStylable|SVGFilterPrimitiveStandardAttributes|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheet|CSSStyleSheet|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextureS3TC|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
   ];
   $dynamicSetMetadata(table);
 })();
+//  ********** Globals **************
+function $static_init(){
+}
+var const$0000 = Object.create(_DeletedKeySentinel.prototype, {});
+var const$0001 = Object.create(NoMoreElementsException.prototype, {});
 var $globals = {};
+$static_init();
 main();
