@@ -1,9 +1,5 @@
 #import('dart:html');
 
-muh(){
-  
-}
-
 class heart {
 
   var _intervalId;
@@ -56,7 +52,6 @@ class heart {
   }
 }
 
-void main() {
-  muh();
+main() {
   new heart().run();
 }

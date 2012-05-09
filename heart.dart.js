@@ -2712,7 +2712,7 @@ heart.prototype.get$heartMaker = function() {
   return this.heartMaker.bind(this);
 }
 function muh() {
-
+  return (5);
 }
 function main() {
   muh();

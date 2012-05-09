@@ -1978,6 +1978,7 @@ $.ceil = function(receiver) {
 };
 
 $.muh = function() {
+  return 5;
 };
 
 $._computeLoadLimit = function(capacity) {
