@@ -1677,7 +1677,42 @@ _EventListenerListImpl.prototype.add$1 = function($0) {
 $dynamic("get$name").HTMLFieldSetElement = function() { return this.name; };
 $dynamic("get$name").File = function() { return this.name; };
 $dynamic("get$name").FileException = function() { return this.name; };
+$dynamic("is$List").FileList = function(){return true};
+$dynamic("is$Collection").FileList = function(){return true};
 $dynamic("get$length").FileList = function() { return this.length; };
+$dynamic("$index").FileList = function(index) {
+  return this[index];
+}
+$dynamic("$setindex").FileList = function(index, value) {
+  $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
+}
+$dynamic("iterator").FileList = function() {
+  return new _FixedSizeListIterator_html_File(this);
+}
+$dynamic("add").FileList = function(value) {
+  $throw(new UnsupportedOperationException("Cannot add to immutable List."));
+}
+$dynamic("forEach").FileList = function(f) {
+  return _Collections.forEach(this, f);
+}
+$dynamic("filter").FileList = function(f) {
+  return _Collections.filter(this, [], f);
+}
+$dynamic("last").FileList = function() {
+  return this.$index(this.length - (1));
+}
+$dynamic("removeLast").FileList = function() {
+  $throw(new UnsupportedOperationException("Cannot removeLast on immutable List."));
+}
+$dynamic("add$1").FileList = function($0) {
+  return this.add($0);
+};
+$dynamic("filter$1").FileList = function($0) {
+  return this.filter($wrap_call$1(to$call$1($0)));
+};
+$dynamic("forEach$1").FileList = function($0) {
+  return this.forEach($wrap_call$1(to$call$1($0)));
+};
 $dynamic("$dom_addEventListener$3").FileReader = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
 };
@@ -2593,6 +2628,16 @@ $inherits(_FixedSizeListIterator_num, _FixedSizeListIterator);
 function _FixedSizeListIterator_num(array) {
   this._html_length = array.get$length();
   _VariableSizeListIterator_num.call(this, array);
+}
+$inherits(_VariableSizeListIterator_html_File, _VariableSizeListIterator);
+function _VariableSizeListIterator_html_File(array) {
+  this._html_array = array;
+  this._html_pos = (0);
+}
+$inherits(_FixedSizeListIterator_html_File, _FixedSizeListIterator);
+function _FixedSizeListIterator_html_File(array) {
+  this._html_length = array.get$length();
+  _VariableSizeListIterator_html_File.call(this, array);
 }
 $inherits(_VariableSizeListIterator_html_Node, _VariableSizeListIterator);
 function _VariableSizeListIterator_html_Node(array) {

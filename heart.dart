@@ -1,6 +1,6 @@
 #import('dart:html');
 
-void muh(){
+muh(){
   
 }
 
@@ -14,7 +14,7 @@ class heart {
   heart() {
   }
 
-  void run() {
+  run() {
    
     CanvasElement drawingArea = document.query('#drawingArea');
 
@@ -25,7 +25,7 @@ class heart {
 
   }
 
-  void heartMaker(){
+  heartMaker(){
  
     CanvasElement drawingArea = document.query('#drawingArea');
     CanvasRenderingContext2D ctx = drawingArea.getContext('2d');
