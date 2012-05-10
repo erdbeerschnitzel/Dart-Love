@@ -1,7 +1,5 @@
 #import('dart:html');
 
-class heart {
-
   var _intervalId;
   var count = 0;
   var offset = 0;
@@ -13,7 +11,7 @@ class heart {
     drawingArea.width = window.innerWidth - 100; 
     drawingArea.height = window.innerHeight - 150;
 
-    _intervalId = document.window.setInterval(this.heartMaker, 30);   
+    _intervalId = document.window.setInterval(heartMaker, 30);   
 
   }
 
@@ -46,8 +44,8 @@ class heart {
     count += 0.05;    
     
   }
-}
+
 
 main() {
-  new heart().run();
+  run();
 }

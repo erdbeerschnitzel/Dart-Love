@@ -240,29 +240,6 @@ function $dynamic(name) {
   return methods;
 }
 if (typeof $dynamicMetadata == 'undefined') $dynamicMetadata = [];
-Function.prototype.bind = Function.prototype.bind ||
-  function(thisObj) {
-    var func = this;
-    var funcLength = func.$length || func.length;
-    var argsLength = arguments.length;
-    if (argsLength > 1) {
-      var boundArgs = Array.prototype.slice.call(arguments, 1);
-      var bound = function() {
-        // Prepend the bound arguments to the current arguments.
-        var newArgs = Array.prototype.slice.call(arguments);
-        Array.prototype.unshift.apply(newArgs, boundArgs);
-        return func.apply(thisObj, newArgs);
-      };
-      bound.$length = Math.max(0, funcLength - (argsLength - 1));
-      return bound;
-    } else {
-      var bound = function() {
-        return func.apply(thisObj, arguments);
-      };
-      bound.$length = funcLength;
-      return bound;
-    }
-  };
 function $dynamicSetMetadata(inputTable) {
   // TODO: Deal with light isolates.
   var table = [];
@@ -2679,40 +2656,34 @@ function get$$document() {
 var _cachedBrowserPrefix;
 var _pendingRequests;
 var _pendingMeasurementFrameCallbacks;
-function heart() {
-  this.count = (0);
-  this.offset = (0);
-}
-heart.prototype.run = function() {
+var _intervalId;
+function run() {
   var drawingArea = get$$document().query("#drawingArea");
   drawingArea.width = get$$window().innerWidth - (100);
   drawingArea.height = get$$window().innerHeight - (150);
-  this._intervalId = get$$document().get$window().setInterval($wrap_call$0(this.get$heartMaker()), (30));
+  $globals._intervalId = get$$document().get$window().setInterval($wrap_call$0(heartMaker), (30));
 }
-heart.prototype.heartMaker = function() {
+function heartMaker() {
   var drawingArea = get$$document().query("#drawingArea");
   var ctx = drawingArea.getContext("2d");
   ctx.fillStyle = "black";
   ctx.fillRect((0), (0), get$$window().innerWidth - (100), get$$window().innerHeight - (150));
   for (var i = (0);
    $lte$(i, get$$window().innerHeight - (150)); i = $add$(i, ((get$$window().innerHeight - (150)) / (20)))) {
-    var y = (get$$window().innerWidth - (100)) / (6) * Math.sin($add$(this.count, this.offset)) + (get$$window().innerWidth - (100)) / (2);
-    var r = (15) * Math.sin(this.count) + (50);
+    var y = (get$$window().innerWidth - (100)) / (6) * Math.sin($add$($globals.count, $globals.offset)) + (get$$window().innerWidth - (100)) / (2);
+    var r = (15) * Math.sin($globals.count) + (50);
     ctx.fillStyle = ("hsl(" + i + "," + r + "%,50%)");
     ctx.font = $add$("" + $div$(r, (2)), "px Arial");
     ctx.fillText("\u2665 ", $negate$(y) + (get$$window().innerWidth - (100)), i);
     ctx.font = $add$("" + $div$(r, (2)), "px Arial");
     ctx.fillText("\u2665 ", y, i);
-    this.offset = $add$(this.offset, (0.2));
+    $globals.offset = $add$($globals.offset, (0.2));
   }
-  this.offset = (0);
-  this.count = $add$(this.count, (0.05));
-}
-heart.prototype.get$heartMaker = function() {
-  return this.heartMaker.bind(this);
+  $globals.offset = (0);
+  $globals.count = $add$($globals.count, (0.05));
 }
 function main() {
-  new heart().run();
+  run();
 }
 (function(){
   var v0/*CharacterData*/ = 'CharacterData|Comment|Text|CDATASection';
@@ -2746,12 +2717,15 @@ function main() {
   $dynamicSetMetadata(table);
 })();
 function $static_init(){
+  $globals.count = (0);
+  $globals.offset = (0);
 }
 var const$0000 = Object.create(_DeletedKeySentinel.prototype, {});
 var const$0001 = Object.create(NoMoreElementsException.prototype, {});
 var const$0002 = Object.create(EmptyQueueException.prototype, {});
 var const$0003 = Object.create(UnsupportedOperationException.prototype, {_message: {"value": "", writeable: false}});
 var const$0004 = new JSSyntaxRegExp("^#[_a-zA-Z]\\w*$");
+var $globals = {};
 $static_init();
 if (typeof window != 'undefined' && typeof document != 'undefined' &&
     window.addEventListener && document.readyState == 'loading') {
