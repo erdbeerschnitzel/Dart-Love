@@ -6,10 +6,6 @@ class heart {
   var count = 0;
   var offset = 0;
 
-  
-  heart() {
-  }
-
   run() {
    
     CanvasElement drawingArea = document.query('#drawingArea');

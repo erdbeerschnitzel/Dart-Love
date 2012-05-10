@@ -1922,7 +1922,6 @@ $.newList = function(length$) {
 };
 
 $.main = function() {
-  $.muh();
   $.heart$0().run$0();
 };
 
@@ -1975,10 +1974,6 @@ $.ceil = function(receiver) {
     return receiver.ceil$0();
   }
   return Math.ceil(receiver);
-};
-
-$.muh = function() {
-  return 5;
 };
 
 $._computeLoadLimit = function(capacity) {
