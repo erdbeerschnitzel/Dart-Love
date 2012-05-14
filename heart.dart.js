@@ -2553,6 +2553,10 @@ function _CSSStyleDeclarationFactoryProvider() {}
 function _DocumentFragmentFactoryProvider() {}
 function _SVGElementFactoryProvider() {}
 function _SVGSVGElementFactoryProvider() {}
+function _DOMWindowCrossFrameImpl() {}
+_DOMWindowCrossFrameImpl.prototype.get$length = function() {
+  return this._window.length;
+}
 function _AudioContextFactoryProvider() {}
 function _PointFactoryProvider() {}
 function _WebSocketFactoryProvider() {}
