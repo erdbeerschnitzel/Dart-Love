@@ -2181,6 +2181,7 @@ $dynamic("$dom_addEventListener$3").PeerConnection00 = function($0, $1, $2) {
 $inherits(_PeerConnection00EventsImpl, _EventsImpl);
 function _PeerConnection00EventsImpl() {}
 $dynamic("get$value").HTMLProgressElement = function() { return this.value; };
+$dynamic("get$value").RadioNodeList = function() { return this.value; };
 $dynamic("get$name").RangeException = function() { return this.name; };
 $dynamic("get$length").SQLResultSetRowList = function() { return this.length; };
 $dynamic("get$value").SVGAngle = function() { return this.value; };
@@ -2426,54 +2427,12 @@ $dynamic("removeLast").Uint8Array = function() {
   $throw(new UnsupportedOperationException("Cannot removeLast on immutable List."));
 }
 $dynamic("add$1").Uint8Array = function($0) {
-  if (Object.getPrototypeOf(this).hasOwnProperty("add$1")) {
-    return this.add($0);
-  }
-  return Object.prototype.add$1.call(this, $0);
-};
-$dynamic("filter$1").Uint8Array = function($0) {
-  if (Object.getPrototypeOf(this).hasOwnProperty("filter$1")) {
-    return this.filter($wrap_call$1(to$call$1($0)));
-  }
-  return Object.prototype.filter$1.call(this, $0);
-};
-$dynamic("forEach$1").Uint8Array = function($0) {
-  if (Object.getPrototypeOf(this).hasOwnProperty("forEach$1")) {
-    return this.forEach($wrap_call$1(to$call$1($0)));
-  }
-  return Object.prototype.forEach$1.call(this, $0);
-};
-$dynamic("$index").Uint8ClampedArray = function(index) {
-  return this[index];
-}
-$dynamic("$setindex").Uint8ClampedArray = function(index, value) {
-  this[index] = value
-}
-$dynamic("iterator").Uint8ClampedArray = function() {
-  return new _FixedSizeListIterator_int(this);
-}
-$dynamic("add").Uint8ClampedArray = function(value) {
-  $throw(new UnsupportedOperationException("Cannot add to immutable List."));
-}
-$dynamic("forEach").Uint8ClampedArray = function(f) {
-  return _Collections.forEach(this, f);
-}
-$dynamic("filter").Uint8ClampedArray = function(f) {
-  return _Collections.filter(this, [], f);
-}
-$dynamic("last").Uint8ClampedArray = function() {
-  return this.$index(this.length - (1));
-}
-$dynamic("removeLast").Uint8ClampedArray = function() {
-  $throw(new UnsupportedOperationException("Cannot removeLast on immutable List."));
-}
-$dynamic("add$1").Uint8ClampedArray = function($0) {
   return this.add($0);
 };
-$dynamic("filter$1").Uint8ClampedArray = function($0) {
+$dynamic("filter$1").Uint8Array = function($0) {
   return this.filter($wrap_call$1(to$call$1($0)));
 };
-$dynamic("forEach$1").Uint8ClampedArray = function($0) {
+$dynamic("forEach$1").Uint8Array = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
 $dynamic("get$name").WebGLActiveInfo = function() { return this.name; };
@@ -2716,6 +2675,7 @@ function main() {
     , ['WorkerContext', v8/*WorkerContext*/]
     , ['EventTarget', [v4/*AbstractWorker*/,v5/*IDBRequest*/,v6/*MediaStream*/,v7/*Node*/,v8/*WorkerContext*/,'EventTarget|AudioContext|BatteryManager|DOMApplicationCache|DeprecatedPeerConnection|EventSource|FileReader|FileWriter|IDBDatabase|IDBTransaction|MediaController|MessagePort|Notification|PeerConnection00|SpeechRecognition|TextTrack|TextTrackCue|TextTrackList|WebSocket|DOMWindow|XMLHttpRequest|XMLHttpRequestUpload'].join('|')]
     , ['HTMLCollection', 'HTMLCollection|HTMLOptionsCollection']
+    , ['NodeList', 'NodeList|RadioNodeList']
     , ['Uint8Array', 'Uint8Array|Uint8ClampedArray']
   ];
   $dynamicSetMetadata(table);
