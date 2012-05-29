@@ -996,7 +996,7 @@ $.JSSyntaxRegExp$_globalVersionOf$1 = function(other) {
   return t2;
 };
 
-$.convertDartClosureToJS = function(closure) {
+$.convertDartClosureToJS = function(closure, arity) {
   if (closure === (void 0)) {
     return;
   } else {
@@ -1007,7 +1007,7 @@ $.convertDartClosureToJS = function(closure) {
   } else {
   }
   var function0 = (function() {
-    return $.invokeClosure.$call$5(closure, $, arguments.length, arguments[0], arguments[1]);
+    return $.invokeClosure.$call$5(closure, $, arity, arguments[0], arguments[1]);
   });
   closure.$identity = function0;
   return function0;
@@ -3508,13 +3508,13 @@ $.$defineNativeClass('HTMLVideoElement', ["width!", "height!"], {
 
 $.$defineNativeClass('DOMWindow', ["window?", "length?", "innerWidth?", "innerHeight?"], {
  setInterval$2: function(handler, timeout) {
-  return this.setInterval($.convertDartClosureToJS(handler),timeout);
+  return this.setInterval($.convertDartClosureToJS(handler, 0),timeout);
  }
 });
 
 $.$defineNativeClass('WorkerContext', [], {
  setInterval$2: function(handler, timeout) {
-  return this.setInterval($.convertDartClosureToJS(handler),timeout);
+  return this.setInterval($.convertDartClosureToJS(handler, 0),timeout);
  }
 });
 
