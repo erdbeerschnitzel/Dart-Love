@@ -2473,6 +2473,7 @@ function _CSSMatrixFactoryProvider() {}
 function _DOMParserFactoryProvider() {}
 function _DOMURLFactoryProvider() {}
 function _DeprecatedPeerConnectionFactoryProvider() {}
+function _Elements() {}
 function _EventSourceFactoryProvider() {}
 function _FileReaderFactoryProvider() {}
 function _FileReaderSyncFactoryProvider() {}
@@ -2495,7 +2496,6 @@ function _XMLHttpRequestFactoryProvider() {}
 function _XMLSerializerFactoryProvider() {}
 function _XPathEvaluatorFactoryProvider() {}
 function _XSLTProcessorFactoryProvider() {}
-function _Elements() {}
 function _Collections() {}
 _Collections.forEach = function(iterable, f) {
   for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
@@ -2643,9 +2643,9 @@ function heartMaker() {
     var y = (get$$window().innerWidth - (100)) / (6) * Math.sin($add$($globals.count, $globals.offset)) + (get$$window().innerWidth - (100)) / (2);
     var r = (15) * Math.sin($globals.count) + (50);
     ctx.fillStyle = ("hsl(" + i + "," + r + "%,50%)");
-    ctx.font = $add$("" + $div$(r, (2)), "px Arial");
+    ctx.font = $add$($add$("", ($div$(r, (2))).toString()), "px Arial");
     ctx.fillText("\u2665 ", $negate$(y) + (get$$window().innerWidth - (100)), i);
-    ctx.font = $add$("" + $div$(r, (2)), "px Arial");
+    ctx.font = $add$($add$("", ($div$(r, (2))).toString()), "px Arial");
     ctx.fillText("\u2665 ", y, i);
     $globals.offset = $add$($globals.offset, (0.2));
   }
