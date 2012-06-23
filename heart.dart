@@ -31,10 +31,10 @@
 
       ctx.fillStyle = "hsl($i,$r%,50%)";
 
-      ctx.font = "" + (r/2).toString() + "px Arial"; 
+      ctx.font = (r/2).toString().concat("px Arial"); 
       ctx.fillText( '\u2665 ', -y + (window.innerWidth - 100), i );
       
-      ctx.font = "" + (r/2).toString() + "px Arial";       
+      ctx.font = (r/2).toString().concat("px Arial");       
       ctx.fillText( '\u2665 ', y, i );
       
       offset += 0.2; 
