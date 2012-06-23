@@ -28,13 +28,12 @@
       var y = (window.innerWidth - 100)/6 * Math.sin(count + offset) + (window.innerWidth - 100)/2;
       var r = 15 * Math.sin(count) + 50; 
 
-
       ctx.fillStyle = "hsl($i,$r%,50%)";
 
-      ctx.font = (r/2).toString().concat("px Arial"); 
-      ctx.fillText( '\u2665 ', -y + (window.innerWidth - 100), i );
+      ctx.font = "${r/2}px Arial"; 
       
-      ctx.font = (r/2).toString().concat("px Arial");       
+      ctx.fillText( '\u2665 ', -y + (window.innerWidth - 100), i );
+ 
       ctx.fillText( '\u2665 ', y, i );
       
       offset += 0.2; 
