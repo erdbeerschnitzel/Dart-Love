@@ -1,4 +1,5 @@
 #import('dart:html');
+#import('dart:math');
 
   var _intervalId;
   var count = 0;
@@ -11,7 +12,7 @@
     drawingArea.width = window.innerWidth - 100; 
     drawingArea.height = window.innerHeight - 150;
 
-    _intervalId = document.window.setInterval(heartMaker, 30);   
+    _intervalId = window.setInterval(heartMaker, 30);   
 
   }
 
@@ -23,10 +24,10 @@
     ctx.fillStyle = 'black';
     ctx.fillRect(0,0,window.innerWidth - 100,window.innerHeight - 150); 
    
-    for(var i = 0; i <= window.innerHeight - 150; i += (window.innerHeight - 150)/20 ) {
+    for(double i = 0.0; i <= window.innerHeight - 150; i += (window.innerHeight - 150)/20 ) {
 
-      var y = (window.innerWidth - 100)/6 * Math.sin(count + offset) + (window.innerWidth - 100)/2;
-      var r = 15 * Math.sin(count) + 50; 
+      var y = (window.innerWidth - 100)/6 * sin(count + offset) + (window.innerWidth - 100)/2;
+      var r = 15 * sin(count) + 50; 
 
       ctx.fillStyle = "hsl($i,$r%,50%)";
 
@@ -45,6 +46,4 @@
   }
 
 
-main() {
-  run();
-}
+main() =>  run();
