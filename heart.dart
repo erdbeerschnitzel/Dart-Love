@@ -1,22 +1,11 @@
 import 'dart:html';
 import 'dart:math';
 
-  var _intervalId;
-  var count = 0;
-  var offset = 0;
+var _intervalId;
+var count = 0;
+var offset = 0;
 
-  run() {
-
-    CanvasElement drawingArea = document.query('#drawingArea');
-
-    drawingArea.width = window.innerWidth - 100;
-    drawingArea.height = window.innerHeight - 150;
-
-    _intervalId = window.setInterval(heartMaker, 30);
-
-  }
-
-  heartMaker(){
+heartMaker(){
 
     CanvasElement drawingArea = document.query('#drawingArea');
     CanvasRenderingContext2D ctx = drawingArea.getContext('2d');
@@ -46,4 +35,12 @@ import 'dart:math';
   }
 
 
-main() =>  run();
+main(){
+  
+  CanvasElement drawingArea = document.query('#drawingArea');
+
+  drawingArea.width = window.innerWidth - 100;
+  drawingArea.height = window.innerHeight - 150;
+
+  _intervalId = window.setInterval(heartMaker, 30);
+}
